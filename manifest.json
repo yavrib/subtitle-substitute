@@ -9,6 +9,12 @@
   "page_action": {
     "default_popup": "popup.html"
   },
+  "content_scripts": [
+    {
+      "matches": ["https://*.netflix.com/*"],
+      "js": ["content-script.js"]
+    }
+  ],
   "permissions": ["declarativeContent", "activeTab"],
   "manifest_version": 2
 }
