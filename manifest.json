@@ -11,7 +11,7 @@
   },
   "content_scripts": [
     {
-      "matches": ["https://*.netflix.com/*"],
+      "matches": ["https://*.chrome.com/*"],
       "js": ["content-script.js"]
     }
   ],

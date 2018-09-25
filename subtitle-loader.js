@@ -1,3 +1,5 @@
+const parserMap = { srt: srtParser };
+
 chrome.runtime.onConnect.addListener(function(port) {
   console.log('Connection Established');
 
@@ -18,7 +20,9 @@ chrome.runtime.onConnect.addListener(function(port) {
   inputElement.addEventListener("change", function(event) {
     const file = event.target.files[0];
     const fileExtension = getExtension(file.name);
-    if (fileExtension !== 'srt') {
+    const parser = parserMap[fileExtension];
+
+    if (!parser) {
       alert('Not supported file type!');
       return;
     }
@@ -26,7 +30,7 @@ chrome.runtime.onConnect.addListener(function(port) {
     fr = new FileReader();
     fr.readAsText(file);
     fr.addEventListener("load", function(event) {
-      subtitle.content = srtParser(event.target.result);
+      subtitle.content = parser(event.target.result);
     });
   }, false);
 
