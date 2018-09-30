@@ -14,5 +14,16 @@ const srtParser = (content) => {
 const srtTimeToTimestamp = (srtTime) => {
   const [ hours, minutes, seconds, milliseconds ] = srtTime.split(/[:,]/)
 
+  console.log(
+    'hours',
+    hours,
+    'minutes',
+    minutes,
+    'seconds',
+    seconds,
+    'milliseconds',
+    milliseconds
+  )
+
   return (((hours * 60 + minutes) * 60) + seconds) * 1000 + milliseconds;
 }

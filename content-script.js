@@ -1,6 +1,10 @@
-const port = chrome.runtime.connect();
+console.log('gonna try to connect');
+// This does not work
+const port = chrome.runtime.connect('kkmdmkacfdkimjcfkkiojbdkiamjkbmg');
+console.log('tried connecting, this is result:', port);
 const extensionElementId = 'Subtitle-Substitute-Subtitles';
 let subtitleIndex = 0;
+let videoElem;
 
 const subtitle = {
   subscribers: [],
@@ -37,8 +41,10 @@ const mountVideoListener = (records) => {
       record.addedNodes[0].innerHTML &&
       record.addedNodes[0].innerHTML.indexOf('<video') === 0
     ) {
-      document.getElementsByTagName('video')[0].ontimeupdate = (event) => {
-        const sub = getSubtitle(event.timeStamp); // returns correct subtitle to show
+
+      videoElem = document.getElementsByTagName('video')[0];
+      videoElem.ontimeupdate = () => {
+        const sub = getSubtitle(videoElem.currentTime); // returns correct subtitle to show
         const subtitleElement = getSubtitleElement();
         subtitleElement.innerHTML = sub;
       };
