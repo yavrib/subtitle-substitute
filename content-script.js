@@ -28,7 +28,7 @@ const subtitle = {
 const createSubtitleElement = () => {
   subtitleElement = document.createElement('span');
   subtitleElement.id = extensionElementId;
-  subtitleElement.style = 'display: block; position: fixed; height: 20px; bottom: 0; left: 0; right: 0; font-size: 16px; color: white; z-index: 3000;';
+  subtitleElement.style = 'display: block; position: fixed; height: 20px; bottom: 0; left: 0; right: 0; font-size: 16px; color: white; z-index: 3000; text-align: center;';
   document.body.appendChild(subtitleElement);
 }
 
