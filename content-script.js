@@ -1,7 +1,11 @@
-console.log('gonna try to connect');
-// This does not work
-const port = chrome.runtime.connect('kkmdmkacfdkimjcfkkiojbdkiamjkbmg');
-console.log('tried connecting, this is result:', port);
+let port = chrome.runtime.connect('jphkciijdapmllebkkgmnhdmkhgkibek');
+
+port.onDisconnect.addListener(function(event) {
+  console.log('disconnected');
+  console.log('trying to reconnect');
+  port = chrome.runtime.connect('jphkciijdapmllebkkgmnhdmkhgkibek');
+});
+
 const extensionElementId = 'Subtitle-Substitute-Subtitles';
 let subtitleIndex = 0;
 let videoElem;
@@ -12,11 +16,11 @@ const subtitle = {
     this.subscribers.push(fn);
   },
   _content: {},
-  set content (content) {
+  set content(content) {
     this._content = content;
     this.subscribers.forEach(subscriber => subscriber(content));
   },
-  get content () {
+  get content() {
     return this._content;
   }
 };
@@ -24,7 +28,7 @@ const subtitle = {
 const createSubtitleElement = () => {
   subtitleElement = document.createElement('span');
   subtitleElement.id = extensionElementId;
-  subtitleElement.style = 'position: fixed; height: 20px; bottom: 0; left: 0; right: 0; font-size: 16px; color: white;';
+  subtitleElement.style = 'display: block; position: fixed; height: 20px; bottom: 0; left: 0; right: 0; font-size: 16px; color: white; z-index: 3000;';
   document.body.appendChild(subtitleElement);
 }
 
@@ -52,21 +56,28 @@ const mountVideoListener = (records) => {
   })
 }
 
-const getSubtitle = (timestamp) => {
-  let currentSubtitle = '';
+// FIX: find a way to try to connect when only extension html is visible because that's only when you can connect, sadly.
+// FIX: handle video.onseeked event.
 
-  for (let index = subtitleIndex; index < subtitle.content.length; index++) {
-    const sub = subtitle.content[subtitleIndex];
+const getSubtitle = (videoTime) => {
+  const timestamp = Math.ceil(videoTime * 1000);
 
-    console.log(sub.startTime, timestamp, sub.endTime)
-    if (timestamp >= sub.startTime && timestamp <= sub.endTime) {
-      currentSubtitle = sub.text;
-      subtitleIndex = index;
-      break;
-    }
+  const sub = subtitle.content[subtitleIndex];
+
+  if (!sub) {
+    return '';
   }
 
-  return currentSubtitle;
+  if (timestamp > sub.endTime) {
+    subtitleIndex = 1 + subtitleIndex;
+    return '';
+  }
+
+  if (timestamp > sub.startTime) {
+    return subtitle.content[subtitleIndex].text.replace('↵', '<br>');
+  }
+
+  return sub.text;
 
   /*
       00:00:03,400 --> 00:00:06,177

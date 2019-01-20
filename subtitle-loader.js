@@ -1,6 +1,7 @@
 const parserMap = { srt: srtParser };
 
 chrome.runtime.onConnect.addListener(function(port) {
+  console.log(port);
   console.log('Connection Established');
 
   const inputElement = document.getElementById("file-input");
@@ -12,7 +13,7 @@ chrome.runtime.onConnect.addListener(function(port) {
       this.subscribers.push(fn);
     },
     _content: {},
-    set content (content) {
+    set content(content) {
       this._content = content;
       this.subscribers.forEach(subscriber => subscriber(content));
     },
@@ -26,6 +27,7 @@ chrome.runtime.onConnect.addListener(function(port) {
 
     if (!parser) {
       alert('Not supported file type!');
+      inputElement.value = '';
       return;
     }
 
