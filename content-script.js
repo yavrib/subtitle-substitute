@@ -1,9 +1,11 @@
 let port = chrome.runtime.connect('jphkciijdapmllebkkgmnhdmkhgkibek');
-
+let reconnectorId;
 port.onDisconnect.addListener(function(event) {
   console.log('disconnected');
   console.log('trying to reconnect');
-  port = chrome.runtime.connect('jphkciijdapmllebkkgmnhdmkhgkibek');
+  reconnectorId = setInterval(() => {
+    port = chrome.runtime.connect('jphkciijdapmllebkkgmnhdmkhgkibek');
+  }, 300);
 });
 
 const extensionElementId = 'Subtitle-Substitute-Subtitles';
@@ -99,5 +101,6 @@ port.onMessage.addListener(function(event) {
   /** Find the subtitle element and replace it with the subtitles imported */
   console.log('Event received', event)
   if (!(event.from === 'Subtitle Substitute')) return;
+  clearInterval(reconnectorId);
   subtitle.content = event.content;
 })
