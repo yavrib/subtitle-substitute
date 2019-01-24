@@ -1,11 +1,7 @@
 const parserMap = { srt: srtParser };
 
-chrome.runtime.onConnect.addListener(function(port) {
-  console.log(port);
-  console.log('Connection Established');
-
+const jumpStart = port => {
   const inputElement = document.getElementById("file-input");
-  console.log(inputElement);
 
   const subtitle = {
     subscribers: [],
@@ -21,7 +17,6 @@ chrome.runtime.onConnect.addListener(function(port) {
 
   inputElement.addEventListener("change", function(event) {
     const file = event.target.files[0];
-    console.log(file);
     const fileExtension = getExtension(file.name);
     const parser = parserMap[fileExtension];
 
@@ -34,10 +29,9 @@ chrome.runtime.onConnect.addListener(function(port) {
     fr = new FileReader();
     fr.readAsText(file);
     fr.addEventListener("load", function(event) {
-      console.log('file read');
       subtitle.content = parser(event.target.result);
     });
-    fr.onerror = (error) => console.log(error);
+    fr.onerror = (error) => { };// console.log(error);
   }, false);
 
   const getExtension = (fileName) => {
@@ -51,7 +45,14 @@ chrome.runtime.onConnect.addListener(function(port) {
       type: 'NEW_SUBTITLE',
       content: newSubtitle
     };
-    console.log('sent', event)
+
     port.postMessage(event);
-  })
-});
+  });
+};
+
+const spark = setInterval(() => {
+  if (window.port) {
+    clearInterval(spark);
+    jumpStart(window.port);
+  }
+}, 300);
