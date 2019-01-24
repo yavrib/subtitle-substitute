@@ -1,16 +1,15 @@
 let port = chrome.runtime.connect('jphkciijdapmllebkkgmnhdmkhgkibek');
 let reconnectorId;
 port.onDisconnect.addListener(function(_event) {
-  console.log('disconnected');
-  console.log('trying to reconnect');
+  // console.log('disconnected');
   reconnectorId = setInterval(() => {
+    // console.log('trying to reconnect');
     port = chrome.runtime.connect('jphkciijdapmllebkkgmnhdmkhgkibek');
     setupListener(port);
   }, 300);
 });
 
 const extensionElementId = 'Subtitle-Substitute-Subtitles';
-let subtitleIndex = 0;
 let videoElem;
 
 const subtitle = {
@@ -18,7 +17,7 @@ const subtitle = {
   subscribe: function(fn) {
     this.subscribers.push(fn);
   },
-  _content: {},
+  _content: [],
   set content(content) {
     this._content = content;
     this.subscribers.forEach(subscriber => subscriber(content));
@@ -55,44 +54,20 @@ const mountVideoListener = (records) => {
         const subtitleElement = getSubtitleElement();
         subtitleElement.innerHTML = sub;
       };
-
-      videoElem.onseeked = () => {
-        const current = (subtitle.content.length ? subtitle.content : []).filter((content, index) => {
-          const videoTime = Math.ceil(videoElem.currentTime * 1000);
-          // apparently this does not turn back in time as well.
-          // fix this.
-          return (content.startTime > videoTime && content.endTime < videoTime);
-        })[0];
-        const subtitleElement = getSubtitleElement();
-        console.log(current); //debug
-        console.log(subtitle.content); //debug
-        subtitleElement.innerHTML = (current && current.text) || '';
-      };
     }
   })
 }
 
-// FIX: handle video.onseeked event.
-
 const getSubtitle = (videoTime) => {
   const timestamp = Math.ceil(videoTime * 1000);
 
-  const sub = subtitle.content[subtitleIndex];
-  console.log(sub);
-  if (!sub) {
-    return '';
-  }
+  return ((subtitle && subtitle.content) || []).reduce((acc, item) => {
+    if (item && (timestamp > item.startTime && timestamp < item.endTime)) {
+      return item.text;
+    }
 
-  if (timestamp > sub.endTime) {
-    subtitleIndex = 1 + subtitleIndex;
-    return '';
-  }
-
-  if (timestamp > sub.startTime) {
-    return subtitle.content[subtitleIndex].text.replace('↵', '<br>');
-  }
-
-  return sub.text;
+    return acc;
+  }, '');
 
   /*
       00:00:03,400 --> 00:00:06,177
@@ -117,11 +92,11 @@ const setupListener = (port) => {
 
   port.onMessage.addListener(function(event) {
     /** Find the subtitle element and replace it with the subtitles imported */
-    console.log('Event received', event);
+    // console.log('Event received', event);
     if (!(event.from === 'Subtitle Substitute')) return;
     switch (event.type) {
       case 'CONNECTION_ESTABLISHED':
-        console.log('connection established')
+        // console.log('connection established')
         clearInterval(reconnectorId);
         break;
       case 'NEW_SUBTITLE':

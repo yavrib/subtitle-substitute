@@ -31,7 +31,7 @@ const jumpStart = port => {
     fr.addEventListener("load", function(event) {
       subtitle.content = parser(event.target.result);
     });
-    fr.onerror = (error) => console.log(error);
+    fr.onerror = (error) => { };// console.log(error);
   }, false);
 
   const getExtension = (fileName) => {
