@@ -1,10 +1,11 @@
 let port = chrome.runtime.connect('jphkciijdapmllebkkgmnhdmkhgkibek');
 let reconnectorId;
-port.onDisconnect.addListener(function(event) {
+port.onDisconnect.addListener(function(_event) {
   console.log('disconnected');
   console.log('trying to reconnect');
   reconnectorId = setInterval(() => {
     port = chrome.runtime.connect('jphkciijdapmllebkkgmnhdmkhgkibek');
+    setupListener(port);
   }, 300);
 });
 
@@ -54,18 +55,30 @@ const mountVideoListener = (records) => {
         const subtitleElement = getSubtitleElement();
         subtitleElement.innerHTML = sub;
       };
+
+      videoElem.onseeked = () => {
+        const current = (subtitle.content.length ? subtitle.content : []).filter((content, index) => {
+          const videoTime = Math.ceil(videoElem.currentTime * 1000);
+          // apparently this does not turn back in time as well.
+          // fix this.
+          return (content.startTime > videoTime && content.endTime < videoTime);
+        })[0];
+        const subtitleElement = getSubtitleElement();
+        console.log(current); //debug
+        console.log(subtitle.content); //debug
+        subtitleElement.innerHTML = (current && current.text) || '';
+      };
     }
   })
 }
 
-// FIX: find a way to try to connect when only extension html is visible because that's only when you can connect, sadly.
 // FIX: handle video.onseeked event.
 
 const getSubtitle = (videoTime) => {
   const timestamp = Math.ceil(videoTime * 1000);
 
   const sub = subtitle.content[subtitleIndex];
-
+  console.log(sub);
   if (!sub) {
     return '';
   }
@@ -97,10 +110,27 @@ createSubtitleElement();
 const observer = new MutationObserver(mountVideoListener)
 observer.observe(document.body, { childList: true, subtree: true });
 
-port.onMessage.addListener(function(event) {
-  /** Find the subtitle element and replace it with the subtitles imported */
-  console.log('Event received', event)
-  if (!(event.from === 'Subtitle Substitute')) return;
-  clearInterval(reconnectorId);
-  subtitle.content = event.content;
-})
+const setupListener = (port) => {
+  if (!port) {
+    return;
+  }
+
+  port.onMessage.addListener(function(event) {
+    /** Find the subtitle element and replace it with the subtitles imported */
+    console.log('Event received', event)
+    if (!(event.from === 'Subtitle Substitute')) return;
+    switch (event.type) {
+      case 'CONNECTION_ESTABLISHED':
+        clearInterval(reconnectorId);
+        break;
+      case 'NEW_SUBTITLE':
+        subtitle.content = event.content;
+        break;
+      default:
+        console.log(event.message);
+        break;
+    }
+  });
+}
+
+setupListener(port);

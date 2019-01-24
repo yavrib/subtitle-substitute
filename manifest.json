@@ -3,7 +3,9 @@
   "version": "1.0",
   "description": "Netflix subtitle replacer",
   "background": {
-    "scripts": ["background.js"],
+    "scripts": [
+      "background.js"
+    ],
     "persistent": false
   },
   "page_action": {
@@ -11,10 +13,18 @@
   },
   "content_scripts": [
     {
-      "matches": ["https://*.netflix.com/watch*"],
-      "js": ["content-script.js"]
+      "matches": [
+        "https://*.netflix.com/watch*"
+      ],
+      "js": [
+        "content-script.js"
+      ]
     }
   ],
-  "permissions": ["declarativeContent", "activeTab"],
+  "permissions": [
+    "declarativeContent",
+    "activeTab",
+    "background"
+  ],
   "manifest_version": 2
 }
