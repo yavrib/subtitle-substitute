@@ -117,17 +117,17 @@ const setupListener = (port) => {
 
   port.onMessage.addListener(function(event) {
     /** Find the subtitle element and replace it with the subtitles imported */
-    console.log('Event received', event)
+    console.log('Event received', event);
     if (!(event.from === 'Subtitle Substitute')) return;
     switch (event.type) {
       case 'CONNECTION_ESTABLISHED':
+        console.log('connection established')
         clearInterval(reconnectorId);
         break;
       case 'NEW_SUBTITLE':
         subtitle.content = event.content;
         break;
       default:
-        console.log(event.message);
         break;
     }
   });

@@ -1,12 +1,6 @@
 const parserMap = { srt: srtParser };
 
-// chrome.runtime.onConnect.addListener(function(port) {
 const jumpStart = port => {
-  port.postMessage({
-    from: 'Subtitle Substitute',
-    type: 'CONNECTION_ESTABLISHED',
-  });
-
   const inputElement = document.getElementById("file-input");
 
   const subtitle = {

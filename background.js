@@ -9,13 +9,31 @@ chrome.runtime.onInstalled.addListener(function() {
   });
 });
 
+let pagePort;
+
 chrome.runtime.onConnect.addListener(function(port) {
+  if (
+    port &&
+    port.sender &&
+    port.sender.url &&
+    port.sender.url.indexOf('netflix') > 0 // tedious
+  ) {
+    pagePort = port;
+  }
+
   port.postMessage({
     from: 'Subtitle Substitute',
     type: 'CONNECTION_ESTABLISHED',
   });
-  // open when extension clicked
-  // open as popup/small window
-  w = window.open(chrome.extension.getURL('popup.html'));
-  w.port = port;
+
+  port.onMessage.addListener((event) => {
+    if (event.from !== 'Subtitle Substitute') return;
+    if (event.type !== 'TRIGGER') return;
+    w = window.open(
+      chrome.extension.getURL('popup.html'),
+      '_blank',
+      'width=400,height=400'
+    );
+    w.port = pagePort;
+  });
 });

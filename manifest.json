@@ -9,7 +9,7 @@
     "persistent": false
   },
   "page_action": {
-    "default_popup": "popup.html"
+    "default_popup": "trigger.html"
   },
   "content_scripts": [
     {

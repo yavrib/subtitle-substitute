@@ -3,8 +3,6 @@ const srtParser = (content) => {
     const [id, timeBlock, ...rest] = block.split('\n');
     const [startTime, endTime] = timeBlock.split(' --> ');
 
-    console.log(rest.join('\n'));
-
     return {
       id,
       startTime: srtTimeToTimestamp(startTime, 'start'),
